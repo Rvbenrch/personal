@@ -10,7 +10,7 @@ import { Settings } from './settings.js';
 
 // Configuración de Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyATmaLZHpIqLk4q3Gg_lc_wMSviWbHtTqs",
+  apiKey: "AIzaSyATmaLZHpIqlk4q3Gg_lc_wMSviWbHtTqs",
   authDomain: "app-personal-dd2d0.firebaseapp.com",
   databaseURL: "https://app-personal-dd2d0-default-rtdb.firebaseio.com",
   projectId: "app-personal-dd2d0",
