@@ -7,6 +7,24 @@ export class DB {
   setUser(uid) { 
     this.uid = uid; 
   }
+
+  localKey(name) {
+    return `mi-app-personal:${this.uid || 'guest'}:${name}`;
+  }
+
+  readLocal(name, fallback = []) {
+    try {
+      const value = localStorage.getItem(this.localKey(name));
+      return value ? JSON.parse(value) : fallback;
+    } catch (error) {
+      console.warn(`No se pudo leer el respaldo local de ${name}:`, error);
+      return fallback;
+    }
+  }
+
+  writeLocal(name, value) {
+    localStorage.setItem(this.localKey(name), JSON.stringify(value));
+  }
   
   // Helper para obtener la referencia al documento del usuario
   userDoc() { 
@@ -45,7 +63,8 @@ export class DB {
       await this.userDoc().set({ settings }, { merge: true });
     } catch (e) {
       console.error("Error actualizando ajustes:", e);
-      throw e;
+      const current = this.readLocal('settings', {});
+      this.writeLocal('settings', { ...current, ...settings });
     }
   }
   
@@ -55,7 +74,7 @@ export class DB {
       return doc.exists ? doc.data().settings || {} : {};
     } catch (e) {
       console.error("Error obteniendo ajustes:", e);
-      throw e;
+      return this.readLocal('settings', {});
     }
   }
   
@@ -68,7 +87,10 @@ export class DB {
       return docRef.id;
     } catch (e) {
       console.error("Error guardando comida:", e);
-      throw e;
+      const meals = this.readLocal('meals', []);
+      const id = `local-${Date.now()}`;
+      this.writeLocal('meals', [...meals, { ...mealData, id }]);
+      return id;
     }
   }
   
@@ -80,7 +102,7 @@ export class DB {
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error("Error obteniendo comidas del día:", e);
-      throw e;
+      return this.readLocal('meals', []).filter(meal => meal.date === date);
     }
   }
   
@@ -102,7 +124,7 @@ export class DB {
       await this.userCollection('meals').doc(mealId).delete();
     } catch (e) {
       console.error("Error eliminando comida:", e);
-      throw e;
+      this.writeLocal('meals', this.readLocal('meals', []).filter(meal => meal.id !== mealId));
     }
   }
   
@@ -117,7 +139,9 @@ export class DB {
       });
     } catch (e) {
       console.error("Error guardando peso:", e);
-      throw e;
+      const weights = this.readLocal('weights', {});
+      weights[date] = { weight: parseFloat(weight), date, timestamp: new Date().toISOString() };
+      this.writeLocal('weights', weights);
     }
   }
   
@@ -131,7 +155,9 @@ export class DB {
       return snapshot.docs.map(doc => doc.data()).reverse();
     } catch (e) {
       console.error("Error obteniendo historial de peso:", e);
-      throw e;
+      return Object.values(this.readLocal('weights', {}))
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(-limit);
     }
   }
   
@@ -157,29 +183,34 @@ export class DB {
       return docRef.id;
     } catch (e) {
       console.error("Error guardando entrenamiento:", e);
-      throw e;
+      const workouts = this.readLocal('workouts', []);
+      const id = `local-${Date.now()}`;
+      this.writeLocal('workouts', [...workouts, { ...workoutData, id }]);
+      return id;
     }
   }
   
   async getWorkouts(limit = 50) {
     try {
       const snapshot = await this.userCollection('workouts')
-        .orderBy('startTime', 'desc')
+        .orderBy('timestamp', 'desc')
         .limit(limit)
         .get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error("Error obteniendo entrenamientos:", e);
-      throw e;
+      return this.readLocal('workouts', [])
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, limit);
     }
   }
   
   async getWorkoutsByDateRange(startDate, endDate) {
     try {
       const snapshot = await this.userCollection('workouts')
-        .where('startTime', '>=', startDate)
-        .where('startTime', '<=', endDate)
-        .orderBy('startTime', 'desc')
+        .where('timestamp', '>=', startDate)
+        .where('timestamp', '<=', endDate)
+        .orderBy('timestamp', 'desc')
         .get();
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
@@ -188,30 +219,43 @@ export class DB {
     }
   }
   
-  async workoutExists(title, startTime) {
+  async workoutExists(title, timestamp) {
     try {
       const snapshot = await this.userCollection('workouts')
         .where('title', '==', title)
-        .where('startTime', '==', startTime)
+        .where('timestamp', '==', timestamp)
         .limit(1)
         .get();
       return !snapshot.empty;
     } catch (e) {
       console.error("Error comprobando si existe el entrenamiento:", e);
-      throw e;
+      return this.readLocal('workouts', []).some(workout => workout.title === title && workout.timestamp === timestamp);
     }
   }
   
   // === EVENTOS DE AGENDA ===
   
   async saveEvent(eventData) {
+    const localId = eventData.id || `local-${Date.now()}`;
+    const localEvent = { ...eventData, id: localId };
+
     try {
-      eventData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      const docRef = await this.userCollection('events').add(eventData);
+      const remoteEvent = {
+        ...eventData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+      const writePromise = this.userCollection('events').add(remoteEvent);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Tiempo de espera agotado guardando evento')), 5000);
+      });
+      const docRef = await Promise.race([writePromise, timeoutPromise]);
+      this.writeLocal('events', [...this.readLocal('events', []), { ...localEvent, id: docRef.id }]);
       return docRef.id;
     } catch (e) {
       console.error("Error guardando evento:", e);
-      throw e;
+      const events = this.readLocal('events', []);
+      this.writeLocal('events', [...events, localEvent]);
+      return localId;
     }
   }
   
@@ -223,7 +267,7 @@ export class DB {
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error("Error obteniendo eventos del día:", e);
-      throw e;
+      return this.readLocal('events', []).filter(event => event.date === date);
     }
   }
   
@@ -236,7 +280,8 @@ export class DB {
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (e) {
       console.error("Error obteniendo eventos en rango:", e);
-      throw e;
+      return this.readLocal('events', [])
+        .filter(event => event.date >= startDate && event.date <= endDate);
     }
   }
   
@@ -246,7 +291,8 @@ export class DB {
       await this.userCollection('events').doc(eventId).update(data);
     } catch (e) {
       console.error("Error actualizando evento:", e);
-      throw e;
+      const events = this.readLocal('events', []);
+      this.writeLocal('events', events.map(event => event.id === eventId ? { ...event, ...data } : event));
     }
   }
   
@@ -255,7 +301,7 @@ export class DB {
       await this.userCollection('events').doc(eventId).delete();
     } catch (e) {
       console.error("Error eliminando evento:", e);
-      throw e;
+      this.writeLocal('events', this.readLocal('events', []).filter(event => event.id !== eventId));
     }
   }
   

@@ -40,7 +40,7 @@ export class WeightTracker {
 
       // Feedback de éxito
       this.ui.showToast('Peso registrado ✅', 'success');
-      this.ui.hapticFeedback('success');
+      this.ui.haptic('success');
 
       input.value = ''; // Limpiar el campo
 

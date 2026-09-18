@@ -42,10 +42,16 @@
 
     <!-- 2. Login Screen -->
     <div id="login-screen" class="login-screen" style="display: none;">
-        <div class="login-card glass-card">
-            <div class="login-logo">🏋️</div>
-            <h2 class="login-heading">Bienvenido</h2>
-            <p class="login-subtitle">Tu app personal de salud y bienestar</p>
+        <div class="login-visual" aria-hidden="true">
+            <span class="login-visual-kicker">PERSONAL PERFORMANCE</span>
+            <strong>Entrena con intención.<br>Vive con energía.</strong>
+            <span class="login-visual-caption">Tu progreso, tu alimentación y tu día. En un solo lugar.</span>
+        </div>
+        <div class="login-card">
+            <div class="brand-lockup"><span class="brand-mark">M</span><span>MI APP</span></div>
+            <div class="login-logo">↗</div>
+            <h2 class="login-heading">Tu mejor versión<br>empieza hoy.</h2>
+            <p class="login-subtitle">Un espacio privado para medir, entender y mejorar tu rendimiento.</p>
             
             <button id="btn-google-login" class="btn btn-google" aria-label="Iniciar sesión con Google">
                 <svg class="google-icon" viewBox="0 0 24 24">
@@ -108,16 +114,43 @@
         <!-- App Header -->
         <header class="app-header glass-card">
             <div class="header-profile">
-                <img id="user-avatar" class="user-avatar" src="" alt="Perfil de usuario">
+                <div class="avatar-ring"><img id="user-avatar" class="user-avatar" src="" alt="Perfil de usuario"></div>
                 <div class="header-text">
-                    <h2 id="user-greeting" class="user-greeting">Hola</h2>
+                    <span class="header-kicker">TU ESPACIO PERSONAL</span>
+                    <h2 id="user-greeting" class="user-greeting">Buenos días</h2>
                     <p id="current-date" class="current-date">Cargando fecha...</p>
                 </div>
             </div>
+            <button class="header-action" aria-label="Abrir configuración" data-view="settings">⚙</button>
         </header>
 
         <!-- Views Container -->
         <main id="views-container" class="views-container">
+
+            <!-- View: Inicio -->
+            <section id="view-home" class="view home-view">
+                <div class="home-hero">
+                    <div class="home-hero-copy">
+                        <span class="section-eyebrow">RESUMEN DE HOY</span>
+                        <h1>Haz que hoy<br><em>cuente.</em></h1>
+                        <p>Pequeños registros. Grandes cambios.</p>
+                    </div>
+                    <div class="hero-stat"><strong id="home-streak">0</strong><span>días<br>en racha</span></div>
+                </div>
+
+                <div class="home-section-heading"><div><span class="section-eyebrow">ACCESOS RÁPIDOS</span><h2>¿Qué hacemos hoy?</h2></div></div>
+                <div class="quick-actions">
+                    <button class="quick-action quick-action-primary" data-view="food"><span class="quick-action-icon">◒</span><span><strong>Registrar comida</strong><small>Foto o voz con IA</small></span><b>↗</b></button>
+                    <button class="quick-action" data-view="weight"><span class="quick-action-icon">↕</span><span><strong>Anotar peso</strong><small>Controla tu evolución</small></span><b>↗</b></button>
+                    <button class="quick-action" data-view="workouts"><span class="quick-action-icon">✦</span><span><strong>Ver entrenos</strong><small>Tu historial de fuerza</small></span><b>↗</b></button>
+                </div>
+
+                <div class="home-section-heading"><div><span class="section-eyebrow">TU PROGRESO</span><h2>En una mirada</h2></div><button class="text-link" data-view="weight">Ver todo ↗</button></div>
+                <div class="home-metrics">
+                    <button class="metric-tile" data-view="weight"><span class="metric-label">PESO ACTUAL</span><strong id="home-weight">--</strong><small>kg</small><span class="metric-trend">Registrar medida ↗</span></button>
+                    <button class="metric-tile" data-view="food"><span class="metric-label">CALORÍAS</span><strong id="home-calories">0</strong><small>kcal hoy</small><span class="metric-trend">Añadir comida ↗</span></button>
+                </div>
+            </section>
             
             <!-- View: Comidas -->
             <section id="view-food" class="view" style="display: none;">
@@ -171,8 +204,8 @@
                 </div>
 
                 <div class="fab-container">
-                    <button id="btn-food-mic" class="fab fab-secondary" aria-label="Grabar comida">🎤</button>
-                    <button id="btn-food-camera" class="fab fab-primary" aria-label="Foto de comida">📷</button>
+                    <button id="btn-food-mic" class="fab fab-secondary fab-labeled" aria-label="Describir comida por voz">Voz</button>
+                    <button id="btn-food-camera" class="fab fab-primary fab-labeled" aria-label="Añadir foto de comida">Foto</button>
                     <input type="file" id="food-image-input" accept="image/*" capture="environment" style="display: none;">
                 </div>
             </section>
@@ -219,18 +252,19 @@
             <!-- View: Calendario -->
             <section id="view-calendar" class="view" style="display: none;">
                 <header class="view-header">
-                    <h2>📅 Calendario</h2>
+                    <h2>Calendario</h2>
+                    <button id="btn-calendar-add-event" class="btn btn-primary btn-small">Añadir</button>
                 </header>
                 
                 <div class="calendar-nav glass-card">
-                    <button class="btn-icon" aria-label="Mes anterior">◀</button>
+                    <button id="btn-prev-month" class="btn-icon" aria-label="Mes anterior">‹</button>
                     <span id="calendar-month-label" class="month-label">Mes Año</span>
-                    <button class="btn-icon" aria-label="Mes siguiente">▶</button>
+                    <button id="btn-next-month" class="btn-icon" aria-label="Mes siguiente">›</button>
                 </div>
 
                 <div class="filter-toggles">
-                    <button id="btn-filter-workouts" class="filter-toggle active" aria-pressed="true">💪 Entrenos</button>
-                    <button id="btn-filter-meals" class="filter-toggle active" aria-pressed="true">🍽️ Comidas</button>
+                    <button id="btn-filter-workouts" class="filter-toggle active" aria-pressed="true"><span class="filter-dot workout-dot"></span>Entrenos</button>
+                    <button id="btn-filter-meals" class="filter-toggle active" aria-pressed="true"><span class="filter-dot meal-dot"></span>Comidas</button>
                 </div>
 
                 <div class="calendar-container glass-card">
@@ -246,9 +280,9 @@
                 <div id="day-detail-panel" class="slide-panel" style="display: none;">
                     <div class="panel-header">
                         <h3 id="panel-date-title">Fecha</h3>
-                        <button class="btn-close-panel" aria-label="Cerrar detalles">✕</button>
+                        <button id="btn-close-day-detail" class="btn-close-panel" aria-label="Cerrar detalles">×</button>
                     </div>
-                    <div class="panel-content">
+                    <div id="day-detail-content" class="panel-content">
                         <!-- Content populated by JS -->
                     </div>
                 </div>
@@ -289,9 +323,9 @@
                 </header>
 
                 <div class="agenda-nav glass-card">
-                    <button class="btn-icon" aria-label="Día anterior">◀</button>
+                    <button id="btn-prev-day" class="btn-icon" aria-label="Día anterior">◀</button>
                     <span id="agenda-date-label" class="date-label">Fecha</span>
-                    <button class="btn-icon" aria-label="Día siguiente">▶</button>
+                    <button id="btn-next-day" class="btn-icon" aria-label="Día siguiente">▶</button>
                     <button class="btn-icon mini-calendar-toggle" aria-label="Abrir mini calendario">📅</button>
                 </div>
 
@@ -327,7 +361,7 @@
                 </div>
 
                 <div class="fab-container">
-                    <button id="btn-add-event" class="fab fab-primary" aria-label="Añadir evento">➕</button>
+                    <button id="btn-add-event" class="fab fab-primary fab-labeled" aria-label="Añadir evento">Añadir</button>
                 </div>
             </section>
 
@@ -384,7 +418,11 @@
         <!-- Bottom Navigation Bar -->
         <nav id="bottom-nav" class="bottom-nav glass-card">
             <ul class="nav-list">
-                <li class="nav-item active" data-view="food">
+                <li class="nav-item active" data-view="home">
+                    <span class="nav-icon">⌂</span>
+                    <span class="nav-label">Inicio</span>
+                </li>
+                <li class="nav-item" data-view="food">
                     <span class="nav-icon">🍽️</span>
                     <span class="nav-label">Comidas</span>
                 </li>
@@ -491,7 +529,9 @@
     <div id="event-modal" class="modal-wrapper" style="display: none;">
         <div class="modal-backdrop"></div>
         <div class="modal-content glass-card event-modal">
+            <input type="hidden" id="event-id">
             <h3 id="event-modal-title">Nuevo Evento</h3>
+            <input type="hidden" id="event-id">
             <div class="form-group">
                 <label for="event-title">Título</label>
                 <input type="text" id="event-title" class="text-input" placeholder="Ej. Reunión equipo">

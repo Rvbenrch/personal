@@ -33,7 +33,7 @@ const ui = new UI();
 let foodTracker, weightTracker, calendar, hevyImporter, agenda, settings;
 
 // Navegación (SPA Router)
-const routes = ['food', 'weight', 'calendar', 'workouts', 'agenda', 'settings'];
+const routes = ['home', 'food', 'weight', 'calendar', 'workouts', 'agenda', 'settings'];
 
 function navigateTo(viewName) {
   if (!routes.includes(viewName)) return;
@@ -103,6 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       navigateTo(item.dataset.view);
     });
+  });
+
+  document.addEventListener('click', (event) => {
+    const target = event.target.closest('[data-view]');
+    if (target && !target.classList.contains('nav-item')) {
+      event.preventDefault();
+      navigateTo(target.dataset.view);
+    }
   });
 });
 
@@ -245,31 +253,30 @@ async function showMainApp() {
   // Inicializar interfaz de usuario (gestos, ripple, scroll reveal)
   ui.init();
   
-  // Inicializar todos los módulos de features
-  try {
-    settings = new Settings(db, ui, auth);
-    await settings.init();
+  // Crear los módulos y cargar sus datos en segundo plano para no bloquear la app.
+  settings = new Settings(db, ui, auth);
+  foodTracker = new FoodTracker(db, ui);
+  foodTracker.getApiKey = () => settings.getGeminiKey();
+  weightTracker = new WeightTracker(db, ui);
+  hevyImporter = new HevyImporter(db, ui);
+  calendar = new Calendar(db, ui);
+  agenda = new Agenda(db, ui);
+  window.appAgenda = agenda;
 
-    foodTracker = new FoodTracker(db, ui);
-    await foodTracker.init();
-    // Pasar la referencia de settings a food para obtener la API key
-    foodTracker.getApiKey = () => settings.getGeminiKey();
-
-    weightTracker = new WeightTracker(db, ui);
-    await weightTracker.init();
-
-    hevyImporter = new HevyImporter(db, ui);
-    await hevyImporter.init();
-
-    calendar = new Calendar(db, ui);
-    await calendar.init();
-
-    agenda = new Agenda(db, ui);
-    await agenda.init();
-  } catch (error) {
-    console.error('Error inicializando módulos:', error);
-    ui.showToast('Error cargando la app. Recarga la página.', 'error');
-  }
+  Promise.allSettled([
+    settings.init(),
+    foodTracker.init(),
+    weightTracker.init(),
+    hevyImporter.init(),
+    calendar.init(),
+    agenda.init()
+  ]).then(results => {
+    const failed = results.filter(result => result.status === 'rejected');
+    if (failed.length) {
+      console.error('Algunos módulos no pudieron sincronizarse:', failed);
+      ui.showToast('Modo sin conexión: tus datos se guardarán en este dispositivo', 'info', 5000);
+    }
+  });
   
   // Actualizar el header con datos del usuario y fecha actual
   const user = auth.getUser();
@@ -294,8 +301,8 @@ async function showMainApp() {
   }
 
   // Cargar vista inicial
-  const initialView = window.location.hash.replace('#/', '') || 'food';
-  navigateTo(routes.includes(initialView) ? initialView : 'food');
+  const initialView = window.location.hash.replace('#/', '') || 'home';
+  navigateTo(routes.includes(initialView) ? initialView : 'home');
 }
 
 // Iniciar aplicación

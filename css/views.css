@@ -1,5 +1,34 @@
 /* === ESTILOS ESPECÍFICOS DE VISTAS === */
 
+.view {
+  display: block;
+}
+
+.daily-summary-card,
+.weight-input-card,
+.calendar-nav,
+.calendar-container,
+.agenda-nav,
+.agenda-timeline-container,
+.import-card,
+.chart-container {
+  margin-bottom: var(--spacing-lg);
+}
+
+.stats-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stat-card { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.stat-label { color: var(--text-secondary); font-size: 0.78rem; }
+.stat-value { font: 700 1.35rem 'JetBrains Mono', monospace; color: var(--text-primary); }
+.weight-input-card { max-width: 520px; }
+.weight-input-wrapper { display: flex; align-items: center; gap: 10px; margin: var(--spacing-md) 0; }
+.weight-input-wrapper .large-number-input { font: 700 2rem 'JetBrains Mono', monospace; }
+.unit-label { color: var(--text-secondary); font-weight: 700; }
+
+@media (max-width: 680px) {
+  .stats-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .form-group-row { grid-template-columns: 1fr; gap: 0; }
+}
+
 /* --- Splash Screen --- */
 .view-splash {
   display: flex;
@@ -39,6 +68,54 @@
 .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
 
 /* --- Pantalla de Login --- */
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.75fr);
+  background: #0b0d0f;
+}
+
+.login-visual {
+  min-height: 100vh;
+  padding: 9vw 7vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 18px;
+  background: linear-gradient(180deg, rgba(8,10,11,.08) 10%, rgba(8,10,11,.88) 94%), url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1800&q=88') center/cover;
+}
+
+.login-visual-kicker { color: #d7ff4f; font: 700 .7rem 'DM Sans', sans-serif; letter-spacing: .18em; }
+.login-visual strong { max-width: 720px; color: #fff; font: 800 clamp(2.8rem, 6vw, 6.5rem)/.96 'Manrope', sans-serif; letter-spacing: -.06em; }
+.login-visual-caption { max-width: 390px; color: rgba(255,255,255,.7); font-size: 1rem; }
+
+.login-card {
+  width: 100%;
+  min-height: 100vh;
+  max-width: none;
+  padding: 10vh clamp(32px, 6vw, 100px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+  background: #101315;
+}
+
+.brand-lockup { display: flex; align-items: center; gap: 10px; margin-bottom: auto; color: #fff; font: 700 .8rem 'Manrope'; letter-spacing: .14em; }
+.brand-mark { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #101315; font-size: 1rem; }
+.login-logo { color: var(--accent); font-size: 2.4rem; margin-bottom: 26px; }
+.login-heading { font: 800 clamp(2.1rem, 4vw, 3.8rem)/1.02 'Manrope'; letter-spacing: -.06em; margin-bottom: 18px; }
+.login-subtitle { max-width: 360px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 32px; }
+.login-card .btn-google { max-width: 360px; }
+
+@media (max-width: 780px) {
+  .login-screen { display: block; }
+  .login-visual { min-height: 46vh; padding: 30px 24px; }
+  .login-visual strong { font-size: clamp(2.5rem, 12vw, 4.5rem); }
+  .login-card { min-height: 54vh; padding: 32px 24px 46px; }
+  .login-card .brand-lockup { display: none; }
+}
+
 .view-login {
   display: flex;
   align-items: center;
@@ -47,15 +124,46 @@
   padding: var(--spacing-lg);
 }
 
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
 .login-card h1 {
   font-size: 2rem;
   margin-bottom: var(--spacing-xs);
+}
+
+/* --- Inicio: dashboard --- */
+.home-view { padding-top: 28px; }
+.home-hero { min-height: 260px; padding: 34px; display: flex; align-items: flex-end; justify-content: space-between; border-radius: 18px; overflow: hidden; position: relative; background: linear-gradient(90deg, rgba(9,11,12,.96), rgba(9,11,12,.25)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1400&q=85') center/cover; }
+.home-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(9,11,12,.65), transparent 60%); pointer-events: none; }
+.home-hero-copy, .hero-stat { position: relative; z-index: 1; }
+.home-hero h1 { font: 800 clamp(2.4rem, 6vw, 4.8rem)/.96 'Manrope'; letter-spacing: -.07em; margin: 12px 0; }
+.home-hero h1 em { color: var(--accent); font-style: normal; }
+.home-hero p { margin: 0; color: rgba(255,255,255,.7); }
+.hero-stat { display: flex; align-items: center; gap: 9px; color: rgba(255,255,255,.68); font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; }
+.hero-stat strong { color: var(--accent); font: 800 3rem 'Manrope'; }
+.home-section-heading { display: flex; justify-content: space-between; align-items: end; margin: 34px 0 16px; }
+.home-section-heading h2 { margin: 7px 0 0; font-size: 1.35rem; }
+.quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.quick-action, .metric-tile { border: 1px solid rgba(255,255,255,.08); border-radius: 14px; background: #15191b; color: var(--text-primary); cursor: pointer; text-align: left; transition: transform .25s, border-color .25s, background .25s; }
+.quick-action:hover, .metric-tile:hover { transform: translateY(-3px); border-color: rgba(215,255,79,.5); background: #1b2021; }
+.quick-action { min-height: 132px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; }
+.quick-action-primary { background: var(--accent); color: #101315; }
+.quick-action-icon { font-size: 1.5rem; }
+.quick-action strong, .quick-action small { display: block; }
+.quick-action strong { font-size: .9rem; }
+.quick-action small { margin-top: 5px; opacity: .65; font-size: .72rem; }
+.quick-action b { align-self: flex-end; font-size: 1.2rem; }
+.text-link { border: 0; background: none; color: var(--accent); cursor: pointer; font-weight: 700; }
+.home-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.metric-tile { padding: 20px; }
+.metric-label { display: block; color: var(--text-secondary); font-size: .65rem; letter-spacing: .12em; }
+.metric-tile strong { display: inline-block; margin-top: 18px; font: 800 2.3rem 'Manrope'; }
+.metric-tile small { color: var(--text-secondary); margin-left: 6px; }
+.metric-trend { display: block; margin-top: 14px; color: var(--accent); font-size: .72rem; }
+
+@media (max-width: 680px) {
+  .home-hero { min-height: 245px; padding: 24px; }
+  .quick-actions { grid-template-columns: 1fr; }
+  .quick-action { min-height: 76px; display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 10px; }
+  .quick-action b { align-self: center; }
 }
 
 .login-card p {
@@ -304,6 +412,30 @@
   margin-bottom: var(--spacing-sm);
 }
 
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 78px;
+  padding: 14px 18px;
+  background: #171b1d;
+  border-radius: 14px;
+}
+
+.month-label {
+  font: 700 1.35rem 'Manrope', sans-serif;
+  letter-spacing: -.03em;
+}
+
+.filter-toggles { display: flex; gap: 8px; margin: -4px 0 16px; }
+.filter-dot { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; }
+.meal-dot { background: var(--accent); }
+.workout-dot { background: #75b7ff; }
+
+.calendar-container { padding: 20px; background: #f0eee8; border: 0; color: #252a2b; box-shadow: 0 15px 30px rgba(0,0,0,.18); }
+.calendar-header-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; padding: 0 4px 12px; border-bottom: 1px solid rgba(38,42,43,.14); color: #777b78; font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-align: center; }
+.calendar-grid { gap: 5px; padding-top: 10px; }
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -319,13 +451,14 @@
 }
 
 .calendar-cell {
-  aspect-ratio: 1;
+  aspect-ratio: 1 / .92;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-secondary);
+  border-radius: 8px;
+  background-color: transparent;
+  color: #252a2b;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -333,19 +466,23 @@
 }
 
 .calendar-cell:hover {
-  background-color: var(--bg-tertiary);
+  background-color: rgba(37,42,43,.08);
 }
 
 .calendar-cell.active {
-  border: 2px solid var(--accent);
-  box-shadow: inset 0 0 10px rgba(0, 212, 170, 0.2);
+  border: 2px solid #252a2b;
+  background: #fffdf8;
+  box-shadow: 0 3px 0 rgba(37,42,43,.18);
 }
 
 .calendar-cell.today {
-  background-color: rgba(0, 212, 170, 0.15);
-  color: var(--accent);
+  background-color: var(--accent);
+  color: #151819;
   font-weight: 700;
 }
+
+.calendar-cell.outside-month { color: #afb1ad; }
+.calendar-number { font: 600 1rem 'Manrope', sans-serif; }
 
 .calendar-cell.empty {
   background-color: transparent;
@@ -364,8 +501,17 @@
   border-radius: var(--radius-full);
 }
 
-.day-dot.meal { background-color: var(--success); }
-.day-dot.workout { background-color: #3498db; }
+.day-dot.meal-dot { background-color: #8bbf1b; }
+.day-dot.workout-dot { background-color: #4487c7; }
+
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.panel-header h3 { margin: 0; font-size: 1.2rem; }
+.panel-content { color: var(--text-secondary); }
+.calendar-detail-events { margin-top: 18px; }
+.calendar-detail-title { display: flex; align-items: center; gap: 8px; color: var(--text-primary); font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+.calendar-detail-list { display: grid; gap: 7px; list-style: none; padding: 0; }
+.calendar-detail-item { display: flex; justify-content: space-between; gap: 16px; padding: 11px 12px; border-left: 3px solid var(--accent); background: rgba(255,255,255,.05); border-radius: 6px; color: var(--text-primary); }
+.calendar-detail-item span:last-child { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 
 /* --- Vista: Entrenos (Workouts) --- */
 .view-workouts {

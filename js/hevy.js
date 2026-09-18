@@ -215,7 +215,7 @@ export class HevyImporter {
 
     // Notificaciones de resumen
     this.ui.showToast(`${imported} entrenos importados, ${existing} ya existían`, 'success');
-    this.ui.hapticFeedback('success');
+    this.ui.haptic('success');
 
     // Actualizar vista
     await this.loadWorkouts();

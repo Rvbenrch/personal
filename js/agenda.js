@@ -63,10 +63,12 @@ export class Agenda {
     const btnAddEvent = document.getElementById('btn-add-event');
     const btnSaveEvent = document.getElementById('btn-save-event');
     const btnDeleteEvent = document.getElementById('btn-delete-event');
+    const btnCloseEvent = document.querySelector('#event-modal .btn-close-modal-action');
 
     if (btnAddEvent) btnAddEvent.addEventListener('click', () => this.openEventModal());
     if (btnSaveEvent) btnSaveEvent.addEventListener('click', () => this.saveEvent());
     if (btnDeleteEvent) btnDeleteEvent.addEventListener('click', () => this.deleteEvent());
+    if (btnCloseEvent) btnCloseEvent.addEventListener('click', () => this.closeEventModal());
   }
 
   /**
@@ -319,10 +321,8 @@ export class Agenda {
 
     // Tipo de evento
     const targetType = eventData && eventData.type ? eventData.type : 'event';
-    const typeRadios = document.querySelectorAll('input[name="event-type"]');
-    typeRadios.forEach(radio => {
-      radio.checked = (radio.value === targetType);
-    });
+    const typeSelect = document.getElementById('event-type');
+    if (typeSelect) typeSelect.value = targetType;
 
     // Mostrar/ocultar botón de eliminar
     if (btnDelete) {
@@ -330,6 +330,7 @@ export class Agenda {
     }
 
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
     // Forzar un reflow antes de animar
     void modal.offsetWidth;
     modal.classList.add('opacity-100'); // Asume clases de tailwind para fade-in
@@ -344,6 +345,7 @@ export class Agenda {
       modal.classList.remove('opacity-100');
       setTimeout(() => {
         modal.classList.add('hidden');
+        modal.style.display = 'none';
       }, 300); // Esperar a la transición
     }
   }
@@ -363,8 +365,7 @@ export class Agenda {
     const colorRadio = document.querySelector('input[name="event-color"]:checked');
     const color = colorRadio ? colorRadio.value : '#00d4aa';
     
-    const typeRadio = document.querySelector('input[name="event-type"]:checked');
-    const type = typeRadio ? typeRadio.value : 'event';
+    const type = document.getElementById('event-type')?.value || 'event';
 
     if (!title || !startTime) {
       if (this.ui) this.ui.showToast('El título y hora de inicio son requeridos', 'warning');
@@ -395,11 +396,17 @@ export class Agenda {
         if (this.ui) this.ui.showToast('Evento actualizado', 'success');
       } else {
         // Crear nuevo
-        if (this.db) await this.db.saveEvent(eventData);
-        if (this.ui) this.ui.showToast('Evento creado', 'success');
+        const savedId = this.db ? await this.db.saveEvent(eventData) : null;
+        if (this.ui) {
+          const message = savedId && savedId.startsWith('local-')
+            ? 'Evento guardado en este dispositivo; Firebase no responde'
+            : 'Evento guardado en la nube';
+          this.ui.showToast(message, savedId && savedId.startsWith('local-') ? 'warning' : 'success', 5000);
+        }
       }
       
       this.closeEventModal();
+      window.dispatchEvent(new CustomEvent('calendar-events-updated'));
       
       // Si el evento guardado es para el día actual mostrado, recargar
       if (date === this.formatDateISO(this.currentDate)) {

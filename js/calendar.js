@@ -8,6 +8,7 @@ export class Calendar {
     this.filterMeals = true; // Filtro de comidas
     this.mealsData = {}; // { 'YYYY-MM-DD': [meals] }
     this.workoutsData = {}; // { 'YYYY-MM-DD': [workouts] }
+    this.eventsData = {}; // { 'YYYY-MM-DD': [events] }
 
     // Variables para seguimiento de gestos táctiles (swipe)
     this.touchStartX = 0;
@@ -25,6 +26,9 @@ export class Calendar {
    */
   async init() {
     this.setupEventListeners();
+    window.addEventListener('calendar-events-updated', () => {
+      this.loadMonthData().then(() => this.renderCalendar());
+    });
     await this.loadMonthData();
     this.renderCalendar();
   }
@@ -55,6 +59,14 @@ export class Calendar {
         this.filterMeals = !this.filterMeals;
         e.currentTarget.classList.toggle('active', this.filterMeals);
         this.renderCalendar();
+      });
+    }
+
+    const btnAddEvent = document.getElementById('btn-calendar-add-event');
+    if (btnAddEvent) {
+      btnAddEvent.addEventListener('click', () => {
+        const date = this.selectedDate || this.formatDateISO(new Date());
+        window.appAgenda?.openEventModal({ date });
       });
     }
 
@@ -136,6 +148,13 @@ export class Calendar {
       } else {
         this.workoutsData = {}; // Fallback si no hay DB
       }
+
+      if (this.db && typeof this.db.getEventsInRange === 'function') {
+        const events = await this.db.getEventsInRange(startDate, endDate);
+        this.eventsData = this.groupByDate(events);
+      } else {
+        this.eventsData = {};
+      }
     } catch (error) {
       console.error("Error al cargar los datos del mes:", error);
       if (this.ui) this.ui.showToast('Error al cargar el calendario', 'error');
@@ -189,22 +208,7 @@ export class Calendar {
       label.textContent = `${this.monthNames[month]} ${year}`;
     }
 
-    // Mantener los encabezados de los días (Lun, Mar, etc.) si existen en el HTML
-    // Buscamos los elementos con la clase .day-header para no borrarlos
-    const headers = Array.from(grid.querySelectorAll('.day-header'));
-    grid.innerHTML = ''; 
-    headers.forEach(h => grid.appendChild(h));
-
-    // Si no hay encabezados, podríamos generarlos
-    if (headers.length === 0) {
-      const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-      days.forEach(day => {
-        const d = document.createElement('div');
-        d.className = 'day-header font-bold text-center text-sm mb-2 text-gray-500';
-        d.textContent = day;
-        grid.appendChild(d);
-      });
-    }
+    grid.innerHTML = '';
 
     // Cálculos de días
     const firstDayOfMonth = new Date(year, month, 1);
@@ -222,7 +226,7 @@ export class Calendar {
     // Renderizar 42 celdas (6 semanas completas para cubrir todos los casos)
     for (let i = 0; i < 42; i++) {
       const cell = document.createElement('div');
-      cell.className = 'calendar-day relative flex flex-col items-center justify-center p-2 h-14 rounded-lg cursor-pointer transition-colors';
+      cell.className = 'calendar-cell';
       
       const dayNumStr = i - startDay + 1;
       let cellDateObj;
@@ -234,20 +238,19 @@ export class Calendar {
         const prevMonthLastDay = new Date(year, month, 0).getDate();
         const prevMonthDay = prevMonthLastDay - startDay + i + 1;
         cell.textContent = prevMonthDay;
-        cell.classList.add('text-gray-400', 'outside-month');
+        cell.classList.add('outside-month');
         cellDateObj = new Date(year, month - 1, prevMonthDay);
         isCurrentMonth = false;
       } else if (dayNumStr > daysInMonth) {
         // Días del mes siguiente
         const nextMonthDay = dayNumStr - daysInMonth;
         cell.textContent = nextMonthDay;
-        cell.classList.add('text-gray-400', 'outside-month');
+        cell.classList.add('outside-month');
         cellDateObj = new Date(year, month + 1, nextMonthDay);
         isCurrentMonth = false;
       } else {
         // Días del mes actual
         cell.textContent = dayNumStr;
-        cell.classList.add('text-gray-800', 'dark:text-gray-100');
         cellDateObj = new Date(year, month, dayNumStr);
       }
 
@@ -255,43 +258,45 @@ export class Calendar {
 
       // Envolver el texto en un span para aplicar estilos consistentes
       const numSpan = document.createElement('span');
-      numSpan.className = 'text-sm z-10';
+      numSpan.className = 'calendar-number';
       numSpan.textContent = cell.textContent;
       cell.textContent = ''; // Limpiamos texto para usar el span
       cell.appendChild(numSpan);
 
       // Estilo para el día de hoy
       if (cellDateStr === todayStr) {
-        cell.classList.add('border', 'border-primary', 'font-bold');
-        numSpan.classList.add('text-primary');
+        cell.classList.add('today');
       }
 
       // Estilo para el día seleccionado
       if (this.selectedDate === cellDateStr) {
-        cell.classList.add('bg-primary', 'text-white');
-        numSpan.classList.add('text-white');
-        if (cellDateStr === todayStr) {
-          numSpan.classList.remove('text-primary');
-        }
+        cell.classList.add('active');
       }
 
       // Indicadores (puntos de comidas y entrenamientos)
       const hasMeals = this.mealsData[cellDateStr] && this.mealsData[cellDateStr].length > 0;
       const hasWorkouts = this.workoutsData[cellDateStr] && this.workoutsData[cellDateStr].length > 0;
+      const hasEvents = this.eventsData[cellDateStr] && this.eventsData[cellDateStr].length > 0;
 
       const dotsContainer = document.createElement('div');
-      dotsContainer.className = 'flex gap-1 mt-1 absolute bottom-1';
+      dotsContainer.className = 'day-dots';
 
       if (hasMeals && this.filterMeals) {
         const mealDot = document.createElement('span');
-        mealDot.className = 'w-1.5 h-1.5 rounded-full bg-green-500'; // 🟢 verde
+        mealDot.className = 'day-dot meal-dot';
         dotsContainer.appendChild(mealDot);
       }
 
       if (hasWorkouts && this.filterWorkouts) {
         const workoutDot = document.createElement('span');
-        workoutDot.className = 'w-1.5 h-1.5 rounded-full bg-blue-500'; // 🔵 azul
+        workoutDot.className = 'day-dot workout-dot';
         dotsContainer.appendChild(workoutDot);
+      }
+
+      if (hasEvents) {
+        const eventDot = document.createElement('span');
+        eventDot.className = 'day-dot event-dot';
+        dotsContainer.appendChild(eventDot);
       }
 
       if (dotsContainer.children.length > 0) {
@@ -302,7 +307,7 @@ export class Calendar {
       cell.addEventListener('click', () => {
         this.selectedDate = cellDateStr;
         this.renderCalendar(); // Actualiza la vista para mostrar selección
-        this.showDayDetail(cellDateObj, hasMeals, hasWorkouts);
+        this.showDayDetail(cellDateObj, hasMeals, hasWorkouts, hasEvents);
       });
 
       grid.appendChild(cell);
@@ -312,9 +317,9 @@ export class Calendar {
   /**
    * Muestra el panel inferior con los detalles del día seleccionado
    */
-  showDayDetail(dateObj, hasMeals, hasWorkouts) {
+  showDayDetail(dateObj, hasMeals, hasWorkouts, hasEvents) {
     const panel = document.getElementById('day-detail-panel');
-    const header = document.getElementById('day-detail-header');
+    const header = document.getElementById('panel-date-title');
     const content = document.getElementById('day-detail-content');
     
     if (!panel || !header || !content) return;
@@ -330,7 +335,7 @@ export class Calendar {
     let contentHTML = '';
 
     // Si no hay datos
-    if (!hasMeals && !hasWorkouts) {
+    if (!hasMeals && !hasWorkouts && !hasEvents) {
       contentHTML = `<p class="text-gray-500 text-center py-4">No hay registros para este día.</p>`;
     } else {
       // Mostrar comidas
@@ -367,6 +372,23 @@ export class Calendar {
             <li class="bg-gray-50 dark:bg-gray-800 p-2 rounded flex justify-between text-sm">
               <span>${workout.title || 'Entrenamiento'}</span>
               <span class="font-medium">${workout.duration ? workout.duration + ' min' : ''}</span>
+            </li>
+          `;
+        });
+        contentHTML += `</ul></div>`;
+      }
+
+      if (hasEvents) {
+        contentHTML += `
+          <div class="calendar-detail-events">
+            <h4 class="calendar-detail-title"><span class="day-dot event-dot"></span> Agenda</h4>
+            <ul class="calendar-detail-list">
+        `;
+        this.eventsData[dateStr].forEach(event => {
+          contentHTML += `
+            <li class="calendar-detail-item">
+              <span>${event.title || 'Evento'}</span>
+              <span>${event.startTime || ''}</span>
             </li>
           `;
         });

@@ -18,7 +18,11 @@ export class Auth {
       
       if (user) {
         if (userAvatar) userAvatar.src = user.photoURL || 'default-avatar.png';
-        if (userGreeting) userGreeting.textContent = `Hola, ${user.displayName?.split(' ')[0] || 'Usuario'}`;
+        if (userGreeting) {
+          const hour = new Date().getHours();
+          const greeting = hour >= 6 && hour < 13 ? 'Buenos días' : hour < 21 ? 'Buenas tardes' : 'Buenas noches';
+          userGreeting.textContent = `${greeting}, ${user.displayName?.split(' ')[0] || 'Usuario'}`;
+        }
       }
       
       // Ejecutar callback

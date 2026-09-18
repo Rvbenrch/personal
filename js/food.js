@@ -51,8 +51,8 @@ export class FoodTracker {
     }
 
     // Modal
-    const modalSaveBtn = document.getElementById('modal-save-btn');
-    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalSaveBtn = document.getElementById('btn-save-meal');
+    const modalCancelBtn = document.getElementById('btn-cancel-meal');
 
     if (modalSaveBtn) {
       modalSaveBtn.addEventListener('click', () => this.saveMealFromModal());
@@ -73,7 +73,7 @@ export class FoodTracker {
     }
 
     // Modal Inputs para recalcular totales
-    const componentsContainer = document.getElementById('food-components-container');
+    const componentsContainer = document.querySelector('#analysis-components tbody');
     if (componentsContainer) {
       componentsContainer.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT') {
@@ -109,12 +109,19 @@ export class FoodTracker {
     } else {
       console.warn('Speech Recognition API no soportada en este navegador');
       const btnMic = document.getElementById('btn-food-mic');
-      if (btnMic) btnMic.style.display = 'none';
+      if (btnMic) {
+        btnMic.disabled = true;
+        btnMic.title = 'El reconocimiento de voz no está disponible en este navegador';
+        btnMic.setAttribute('aria-disabled', 'true');
+      }
     }
   }
 
   toggleVoiceRecording() {
-    if (!this.recognition) return;
+    if (!this.recognition) {
+      this.ui.showToast('El reconocimiento de voz no está disponible en este navegador', 'warning');
+      return;
+    }
 
     const btnMic = document.getElementById('btn-food-mic');
     
@@ -153,7 +160,7 @@ export class FoodTracker {
       await this.processImageWithGemini(base64);
       
       // Mostrar preview de imagen
-      const imgPreview = document.getElementById('food-image-preview');
+      const imgPreview = document.getElementById('food-preview-img');
       if (imgPreview) {
         imgPreview.src = `data:image/jpeg;base64,${base64}`;
         imgPreview.style.display = 'block';
@@ -212,7 +219,7 @@ export class FoodTracker {
       const analysis = await this.analyzeWithGemini(null, text);
       this.populateModalWithAnalysis(analysis);
       
-      const imgPreview = document.getElementById('food-image-preview');
+      const imgPreview = document.getElementById('food-preview-img');
       if (imgPreview) imgPreview.style.display = 'none';
 
     } catch (error) {
@@ -313,7 +320,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
     }
     this.currentAnalysis = null;
     
-    const imgPreview = document.getElementById('food-image-preview');
+    const imgPreview = document.getElementById('food-preview-img');
     if (imgPreview) {
       imgPreview.src = '';
       imgPreview.style.display = 'none';
@@ -324,11 +331,11 @@ Devuelve SOLO JSON válido con esta estructura exacta:
     this.currentAnalysis = analysis;
     
     // Título
-    const titleInput = document.getElementById('modal-dish-title');
-    if (titleInput) titleInput.value = analysis.dish_title || '';
+    const titleInput = document.getElementById('analysis-dish-title');
+    if (titleInput) titleInput.textContent = analysis.dish_title || 'Comida analizada';
 
     // Tipo de comida
-    const typeSelect = document.getElementById('modal-meal-type');
+    const typeSelect = document.getElementById('meal-type-select');
     if (typeSelect) {
       // Auto-detectar por hora si Gemini no lo da bien
       let mealType = analysis.meal_type;
@@ -367,7 +374,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
   }
 
   renderModalComponents(components) {
-    const container = document.getElementById('food-components-container');
+    const container = document.querySelector('#analysis-components tbody');
     if (!container) return;
 
     container.innerHTML = '';
@@ -378,17 +385,10 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       row.dataset.index = index;
       
       row.innerHTML = `
-        <div class="component-header">
-          <input type="text" class="comp-name" value="${comp.name}" data-field="name" />
-          <button type="button" class="btn-remove-comp" data-index="${index}">❌</button>
-        </div>
-        <div class="component-details">
-          <label>Peso (g): <input type="number" class="comp-weight" value="${comp.weight_g}" data-field="weight_g" /></label>
-          <label>Kcal: <input type="number" class="comp-kcal" value="${comp.calories}" data-field="calories" /></label>
-          <label>Prot: <input type="number" class="comp-prot" value="${comp.protein_g}" data-field="protein_g" step="0.1"/></label>
-          <label>Carb: <input type="number" class="comp-carb" value="${comp.carbs_g}" data-field="carbs_g" step="0.1"/></label>
-          <label>Grasa: <input type="number" class="comp-fat" value="${comp.fat_g}" data-field="fat_g" step="0.1"/></label>
-        </div>
+        <td><input type="text" class="comp-name text-input" value="${comp.name || ''}" data-field="name" /></td>
+        <td><input type="number" class="comp-weight text-input" value="${comp.weight_g || 0}" data-field="weight_g" /></td>
+        <td><input type="number" class="comp-kcal text-input" value="${comp.calories || 0}" data-field="calories" /></td>
+        <td><button type="button" class="btn-remove-comp btn-icon" data-index="${index}" aria-label="Eliminar ingrediente">✕</button></td>
       `;
       container.appendChild(row);
     });
@@ -453,10 +453,10 @@ Devuelve SOLO JSON válido con esta estructura exacta:
     if (!totals) return;
     
     const elements = {
-      kcal: document.getElementById('modal-total-kcal'),
-      prot: document.getElementById('modal-total-prot'),
-      carb: document.getElementById('modal-total-carb'),
-      fat: document.getElementById('modal-total-fat')
+      kcal: document.getElementById('analysis-total-kcal'),
+      prot: document.getElementById('analysis-total-pro'),
+      carb: document.getElementById('analysis-total-car'),
+      fat: document.getElementById('analysis-total-fat')
     };
 
     if (elements.kcal) elements.kcal.textContent = `${totals.calories} kcal`;
@@ -470,11 +470,11 @@ Devuelve SOLO JSON válido con esta estructura exacta:
 
     this.ui.showLoading('Guardando...');
     try {
-      const titleInput = document.getElementById('modal-dish-title');
-      const typeSelect = document.getElementById('modal-meal-type');
+      const titleInput = document.getElementById('analysis-dish-title');
+      const typeSelect = document.getElementById('meal-type-select');
       
       const mealData = {
-        title: titleInput ? titleInput.value : this.currentAnalysis.dish_title,
+        title: titleInput ? titleInput.textContent : this.currentAnalysis.dish_title,
         type: typeSelect ? typeSelect.value : this.currentAnalysis.meal_type,
         components: this.currentAnalysis.components,
         totals: this.currentAnalysis.total_nutrition,
@@ -588,9 +588,6 @@ Devuelve SOLO JSON válido con esta estructura exacta:
   }
 
   updateDailySummary(meals) {
-    const summaryContainer = document.getElementById('daily-summary');
-    if (!summaryContainer) return;
-
     let totalKcal = 0, totalProt = 0, totalCarb = 0, totalFat = 0;
 
     meals.forEach(m => {
@@ -602,29 +599,15 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       }
     });
 
-    // Podríamos obtener los objetivos de la BD o configuración del usuario
-    const goalKcal = 2500;
-    const goalProt = 150;
-    const goalCarb = 300;
-    const goalFat = 80;
-
-    // Usar la función de UI para crear los anillos si existe, de lo contrario un fallback simple
-    if (this.ui && typeof this.ui.createMacroRings === 'function') {
-       summaryContainer.innerHTML = '';
-       const rings = this.ui.createMacroRings({
-         calories: { current: totalKcal, goal: goalKcal },
-         protein: { current: totalProt, goal: goalProt },
-         carbs: { current: totalCarb, goal: goalCarb },
-         fat: { current: totalFat, goal: goalFat }
-       });
-       summaryContainer.appendChild(rings);
-    } else {
-       summaryContainer.innerHTML = `
-         <div class="summary-simple">
-           <h3>Total Diario: ${Math.round(totalKcal)} / ${goalKcal} kcal</h3>
-           <p>Proteínas: ${Math.round(totalProt)}g | Carbos: ${Math.round(totalCarb)}g | Grasas: ${Math.round(totalFat)}g</p>
-         </div>
-       `;
-    }
+    const values = {
+      '#total-calories': `${Math.round(totalKcal)}`,
+      '#val-protein': `${Math.round(totalProt)}`,
+      '#val-carbs': `${Math.round(totalCarb)}`,
+      '#val-fat': `${Math.round(totalFat)}`
+    };
+    Object.entries(values).forEach(([selector, value]) => {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = value;
+    });
   }
 }
