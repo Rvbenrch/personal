@@ -4,7 +4,7 @@
 // Network First para datos dinámicos
 // ============================================
 
-const CACHE_NAME = 'personal-app-v1';
+const CACHE_NAME = 'personal-app-v2';
 const STATIC_ASSETS = [
   '/personal/',
   '/personal/index.html',
