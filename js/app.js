@@ -240,7 +240,7 @@ function showOnboarding() {
 async function showMainApp() {
   hideAllScreens();
   const mainApp = document.getElementById('app-main');
-  if (mainApp) mainApp.style.display = 'flex';
+  if (mainApp) mainApp.style.display = 'block'; // CAMBIADO de flex a block
   
   // Inicializar interfaz de usuario (gestos, ripple, scroll reveal)
   ui.init();
@@ -271,7 +271,7 @@ async function showMainApp() {
     ui.showToast('Error cargando la app. Recarga la página.', 'error');
   }
   
-  // Actualizar el header con datos del usuario
+  // Actualizar el header con datos del usuario y fecha actual
   const user = auth.getUser();
   if (user) {
     const avatar = document.getElementById('user-avatar');
@@ -284,6 +284,13 @@ async function showMainApp() {
       else if (hour >= 13 && hour < 21) saludo = 'Buenas tardes';
       greeting.textContent = `${saludo}, ${user.displayName?.split(' ')[0] || 'Usuario'}`;
     }
+  }
+
+  // Poner fecha de hoy
+  const dateStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+  const dateEl = document.getElementById('current-date');
+  if (dateEl) {
+    dateEl.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
   }
 
   // Cargar vista inicial
