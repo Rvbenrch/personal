@@ -48,7 +48,18 @@ const firebaseConfig = {
 };
 ```
 
-7. En Firestore → Rules, aplica estas reglas de seguridad:
+7. Publica las reglas versionadas de `firestore.rules` en Firestore. Puedes hacerlo desde Firebase CLI:
+
+```bash
+npm install -g firebase-tools
+firebase login
+firebase use app-personal-dd2d0
+firebase deploy --only firestore:rules
+```
+
+Las reglas impiden que un usuario autenticado lea o escriba datos bajo el `uid` de otra persona. No uses Firestore en modo abierto.
+
+Como referencia, el archivo contiene:
 
 ```javascript
 rules_version = '2';
@@ -66,7 +77,9 @@ service cloud.firestore {
 1. Ve a [Google AI Studio](https://aistudio.google.com/)
 2. Click en "Get API key" → "Create API key in new project"
 3. Copia la clave (formato `AIzaSy...`)
-4. Introdúcela en la app: ⚙️ Configuración → API Key de Gemini
+4. Introdúcela en la app: Configuración → API Key de Gemini
+
+**Importante:** la integración actual llama a Gemini desde el navegador, por lo que esa clave puede ser inspeccionada por el usuario. Para producción, mueve la llamada a Gemini a una Cloud Function o servidor propio y aplica restricciones/cuotas a la clave. Las reglas de Firestore no protegen una clave de Gemini.
 
 ### 3. GitHub Pages
 

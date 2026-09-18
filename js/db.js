@@ -25,6 +25,13 @@ export class DB {
   writeLocal(name, value) {
     localStorage.setItem(this.localKey(name), JSON.stringify(value));
   }
+
+  withTimeout(promise, ms = 5000) {
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado')), ms))
+    ]);
+  }
   
   // Helper para obtener la referencia al documento del usuario
   userDoc() { 
@@ -82,8 +89,9 @@ export class DB {
   
   async saveMeal(mealData) {
     try {
-      mealData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      const docRef = await this.userCollection('meals').add(mealData);
+      const remoteMeal = { ...mealData, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      const docRef = await this.withTimeout(this.userCollection('meals').add(remoteMeal));
+      this.writeLocal('meals', [...this.readLocal('meals', []), { ...mealData, id: docRef.id }]);
       return docRef.id;
     } catch (e) {
       console.error("Error guardando comida:", e);
@@ -131,16 +139,19 @@ export class DB {
   // === PESO ===
   
   async saveWeight(date, weight) {
+    const localWeight = { weight: parseFloat(weight), date, timestamp: new Date().toISOString() };
     try {
-      await this.userCollection('weights').doc(date).set({
-        weight: parseFloat(weight),
-        date: date,
+      await this.withTimeout(this.userCollection('weights').doc(date).set({
+        ...localWeight,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      }));
+      const weights = this.readLocal('weights', {});
+      weights[date] = localWeight;
+      this.writeLocal('weights', weights);
     } catch (e) {
       console.error("Error guardando peso:", e);
       const weights = this.readLocal('weights', {});
-      weights[date] = { weight: parseFloat(weight), date, timestamp: new Date().toISOString() };
+      weights[date] = localWeight;
       this.writeLocal('weights', weights);
     }
   }
@@ -178,8 +189,9 @@ export class DB {
   
   async saveWorkout(workoutData) {
     try {
-      workoutData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-      const docRef = await this.userCollection('workouts').add(workoutData);
+      const remoteWorkout = { ...workoutData, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+      const docRef = await this.withTimeout(this.userCollection('workouts').add(remoteWorkout));
+      this.writeLocal('workouts', [...this.readLocal('workouts', []), { ...workoutData, id: docRef.id }]);
       return docRef.id;
     } catch (e) {
       console.error("Error guardando entrenamiento:", e);

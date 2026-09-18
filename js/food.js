@@ -279,7 +279,11 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       });
     }
 
-    const response = await fetch(url, {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    let response;
+    try {
+      response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -287,8 +291,15 @@ Devuelve SOLO JSON válido con esta estructura exacta:
         generationConfig: {
           responseMimeType: 'application/json'
         }
-      })
-    });
+      }),
+      signal: controller.signal
+      });
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error('El análisis ha tardado demasiado. Comprueba la conexión e inténtalo de nuevo.');
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
     
     if (!response.ok) {
       throw new Error(`Error en API de Gemini: ${response.statusText}`);

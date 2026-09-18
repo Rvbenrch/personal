@@ -50,13 +50,17 @@ export class Auth {
       await firebase.auth().signInWithPopup(this.provider);
     } catch (error) {
       console.error("Error al iniciar sesión con popup:", error);
-      // Fallback a redirección si el popup fue bloqueado o estamos en entorno móvil restrictivo
-      if (error.code === 'auth/popup-blocked' || /Mobi|Android/i.test(navigator.userAgent)) {
+      // En móvil los navegadores bloquean popups con códigos variados; la redirección es el flujo fiable.
+      if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ||
+          ['auth/popup-blocked', 'auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(error.code)) {
         try {
           await firebase.auth().signInWithRedirect(this.provider);
         } catch (redirectError) {
           console.error("Error al iniciar sesión con redirección:", redirectError);
+          alert('No se pudo iniciar sesión. Comprueba que rvbenrch.github.io está autorizado en Firebase Authentication.');
         }
+      } else {
+        alert('No se pudo iniciar sesión con Google. Revisa el dominio autorizado en Firebase.');
       }
     }
   }
