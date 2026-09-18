@@ -203,6 +203,15 @@
                     <div class="empty-state">No hay comidas registradas hoy</div>
                 </div>
 
+                <div class="food-entry-card glass-card">
+                    <label for="food-text-input">Describe lo que has comido</label>
+                    <div class="food-text-entry">
+                        <input type="text" id="food-text-input" class="text-input" placeholder="Ej. espaguetis boloñesa, un yogur y una manzana">
+                        <button id="btn-food-text" class="btn btn-primary">Analizar</button>
+                    </div>
+                    <small>Estimaremos cantidades, calorías, macros y coste aproximado.</small>
+                </div>
+
                 <div class="fab-container">
                     <button id="btn-food-mic" class="fab fab-secondary fab-labeled" aria-label="Describir comida por voz">Voz</button>
                     <button id="btn-food-camera" class="fab fab-primary fab-labeled" aria-label="Añadir foto de comida">Foto</button>
@@ -501,6 +510,7 @@
                                 <th>Ingrediente</th>
                                 <th>Cant.</th>
                                 <th>Kcal</th>
+                                <th>Coste</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -514,6 +524,7 @@
                     <div class="nutri-item"><span>Pro</span><strong id="analysis-total-pro">0g</strong></div>
                     <div class="nutri-item"><span>Car</span><strong id="analysis-total-car">0g</strong></div>
                     <div class="nutri-item"><span>Gra</span><strong id="analysis-total-fat">0g</strong></div>
+                    <div class="nutri-item"><span>Coste</span><strong id="analysis-total-cost">0,00 €</strong></div>
                 </div>
                 
                 <div class="modal-actions">

@@ -351,6 +351,17 @@
   font-weight: 700;
 }
 
+.food-entry-card { margin-bottom: var(--spacing-lg); }
+.food-entry-card label { display: block; margin-bottom: 10px; color: var(--text-primary); font: 700 .95rem 'Manrope', sans-serif; }
+.food-text-entry { display: flex; gap: 8px; }
+.food-text-entry .text-input { min-width: 0; flex: 1; }
+.food-entry-card small { display: block; margin-top: 9px; color: var(--text-secondary); font-size: .75rem; }
+
+@media (max-width: 520px) {
+  .food-text-entry { flex-direction: column; }
+  .food-text-entry .btn { width: 100%; }
+}
+
 /* --- Vista: Peso (Weight) --- */
 .view-weight {
   display: flex;

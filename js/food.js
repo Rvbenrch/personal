@@ -50,6 +50,24 @@ export class FoodTracker {
       btnMic.addEventListener('click', () => this.toggleVoiceRecording());
     }
 
+    const btnText = document.getElementById('btn-food-text');
+    const textInput = document.getElementById('food-text-input');
+    if (btnText && textInput) {
+      const analyzeText = () => {
+        const text = textInput.value.trim();
+        if (!text) {
+          this.ui.showToast('Describe primero qué has comido', 'warning');
+          textInput.focus();
+          return;
+        }
+        this.processTextWithGemini(text);
+      };
+      btnText.addEventListener('click', analyzeText);
+      textInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter') analyzeText();
+      });
+    }
+
     // Modal
     const modalSaveBtn = document.getElementById('btn-save-meal');
     const modalCancelBtn = document.getElementById('btn-cancel-meal');
@@ -256,6 +274,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       "protein_g": 25.0,
       "carbs_g": 0.0,
       "fat_g": 12.0,
+      "estimated_cost_eur": 0.85,
       "confidence": "alta|media|baja"
     }
   ],
@@ -264,7 +283,8 @@ Devuelve SOLO JSON válido con esta estructura exacta:
     "protein_g": 35.0,
     "carbs_g": 45.0,
     "fat_g": 18.0,
-    "fiber_g": 5.0
+    "fiber_g": 5.0,
+    "estimated_cost_eur": 2.50
   },
   "assumptions": ["Se estiman 10ml de aceite de oliva (+88 kcal)"]
 }`;
@@ -399,6 +419,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
         <td><input type="text" class="comp-name text-input" value="${comp.name || ''}" data-field="name" /></td>
         <td><input type="number" class="comp-weight text-input" value="${comp.weight_g || 0}" data-field="weight_g" /></td>
         <td><input type="number" class="comp-kcal text-input" value="${comp.calories || 0}" data-field="calories" /></td>
+        <td><input type="number" class="comp-cost text-input" value="${comp.estimated_cost_eur || 0}" step="0.01" min="0" data-field="estimated_cost_eur" /></td>
         <td><button type="button" class="btn-remove-comp btn-icon" data-index="${index}" aria-label="Eliminar ingrediente">✕</button></td>
       `;
       container.appendChild(row);
@@ -440,7 +461,8 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       protein_g: 0,
       carbs_g: 0,
       fat_g: 0,
-      fiber_g: 0
+      fiber_g: 0,
+      estimated_cost_eur: 0
     };
 
     this.currentAnalysis.components.forEach(comp => {
@@ -448,6 +470,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       totals.protein_g += (parseFloat(comp.protein_g) || 0);
       totals.carbs_g += (parseFloat(comp.carbs_g) || 0);
       totals.fat_g += (parseFloat(comp.fat_g) || 0);
+      totals.estimated_cost_eur += (parseFloat(comp.estimated_cost_eur) || 0);
     });
 
     // Redondear a 1 decimal
@@ -455,6 +478,7 @@ Devuelve SOLO JSON válido con esta estructura exacta:
     totals.protein_g = parseFloat(totals.protein_g.toFixed(1));
     totals.carbs_g = parseFloat(totals.carbs_g.toFixed(1));
     totals.fat_g = parseFloat(totals.fat_g.toFixed(1));
+    totals.estimated_cost_eur = parseFloat(totals.estimated_cost_eur.toFixed(2));
 
     this.currentAnalysis.total_nutrition = totals;
     this.updateModalTotals(totals);
@@ -467,13 +491,15 @@ Devuelve SOLO JSON válido con esta estructura exacta:
       kcal: document.getElementById('analysis-total-kcal'),
       prot: document.getElementById('analysis-total-pro'),
       carb: document.getElementById('analysis-total-car'),
-      fat: document.getElementById('analysis-total-fat')
+      fat: document.getElementById('analysis-total-fat'),
+      cost: document.getElementById('analysis-total-cost')
     };
 
     if (elements.kcal) elements.kcal.textContent = `${totals.calories} kcal`;
     if (elements.prot) elements.prot.textContent = `${totals.protein_g}g`;
     if (elements.carb) elements.carb.textContent = `${totals.carbs_g}g`;
     if (elements.fat) elements.fat.textContent = `${totals.fat_g}g`;
+    if (elements.cost) elements.cost.textContent = `${Number(totals.estimated_cost_eur || 0).toFixed(2).replace('.', ',')} €`;
   }
 
   async saveMealFromModal() {
