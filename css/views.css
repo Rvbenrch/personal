@@ -1,0 +1,582 @@
+/* === ESTILOS ESPECÍFICOS DE VISTAS === */
+
+/* --- Splash Screen --- */
+.view-splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--bg-primary);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+.splash-logo {
+  font-size: 4rem;
+  color: var(--accent);
+  animation: pulse 2s infinite, glow 2s infinite;
+  margin-bottom: var(--spacing-xl);
+}
+
+.loading-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.loading-dots span {
+  width: 12px;
+  height: 12px;
+  background-color: var(--accent);
+  border-radius: var(--radius-full);
+  animation: dotPulse 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+/* --- Pantalla de Login --- */
+.view-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--spacing-lg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-card h1 {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.login-card p {
+  margin-bottom: var(--spacing-xl);
+}
+
+.btn-google {
+  background-color: #ffffff;
+  color: #3c4043;
+  width: 100%;
+  border: 1px solid #dadce0;
+}
+
+.btn-google:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3);
+}
+
+.btn-google img {
+  width: 24px;
+  height: 24px;
+}
+
+/* --- Onboarding --- */
+.view-onboarding {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: var(--safe-area-top) 0 var(--safe-area-bottom) 0;
+}
+
+.onboarding-slides {
+  flex-grow: 1;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.onboarding-slides::-webkit-scrollbar {
+  display: none;
+}
+
+.onboarding-slide {
+  min-width: 100vw;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.onboarding-image {
+  width: 80%;
+  max-width: 300px;
+  height: auto;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.onboarding-controls {
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.dots-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: var(--spacing-md);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--text-muted);
+  transition: all 0.3s;
+}
+
+.dot.active {
+  width: 24px;
+  background-color: var(--accent);
+}
+
+/* --- Vista: Comidas (Food) --- */
+.view-food {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.macro-rings-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: var(--spacing-md) 0;
+}
+
+.macro-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.macro-ring svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.macro-ring circle {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.macro-ring .bg { stroke: var(--bg-tertiary); }
+.macro-ring.protein .progress { stroke: var(--protein); stroke-dasharray: 220; stroke-dashoffset: 44; /* Ejemplo 80% */ }
+.macro-ring.carbs .progress { stroke: var(--carbs); stroke-dasharray: 220; stroke-dashoffset: 110; /* Ejemplo 50% */ }
+.macro-ring.fat .progress { stroke: var(--fat); stroke-dasharray: 220; stroke-dashoffset: 66; /* Ejemplo 70% */ }
+
+.macro-value {
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.1rem;
+}
+
+.macro-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.meal-card {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: var(--border-subtle);
+  margin-bottom: var(--spacing-sm);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.meal-card:hover {
+  transform: translateX(4px);
+  background-color: var(--bg-tertiary);
+}
+
+.meal-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background-color: var(--bg-tertiary);
+}
+
+.meal-info {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.meal-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.meal-cals {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* --- Vista: Peso (Weight) --- */
+.view-weight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.stats-row {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+  scrollbar-width: none;
+}
+
+.stats-row::-webkit-scrollbar {
+  display: none;
+}
+
+.stats-row .card-stat {
+  min-width: 140px;
+  flex: 1;
+}
+
+.weight-input-container {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.weight-unit {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.chart-container {
+  width: 100%;
+  height: 250px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: var(--border-subtle);
+  padding: var(--spacing-md);
+  position: relative;
+}
+
+/* --- Vista: Calendario --- */
+.view-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+
+.calendar-day-name {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding-bottom: var(--spacing-sm);
+}
+
+.calendar-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background-color: var(--bg-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.calendar-cell:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.calendar-cell.active {
+  border: 2px solid var(--accent);
+  box-shadow: inset 0 0 10px rgba(0, 212, 170, 0.2);
+}
+
+.calendar-cell.today {
+  background-color: rgba(0, 212, 170, 0.15);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.calendar-cell.empty {
+  background-color: transparent;
+  pointer-events: none;
+}
+
+.day-dots {
+  display: flex;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+
+.day-dot.meal { background-color: var(--success); }
+.day-dot.workout { background-color: #3498db; }
+
+/* --- Vista: Entrenos (Workouts) --- */
+.view-workouts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.import-card {
+  border: 2px dashed var(--text-muted);
+  background-color: rgba(28, 28, 50, 0.3);
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.import-card:hover {
+  border-color: var(--accent);
+  background-color: rgba(0, 212, 170, 0.05);
+}
+
+.workout-card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: var(--border-subtle);
+  overflow: hidden;
+}
+
+.workout-header {
+  padding: var(--spacing-md);
+  background: var(--bg-tertiary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border-subtle);
+}
+
+.exercise-list {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.exercise-item {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: var(--spacing-sm);
+}
+
+.exercise-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.exercise-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.set-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+}
+
+/* --- Vista: Agenda --- */
+.view-agenda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px; /* Espacio para las horas */
+  margin-top: var(--spacing-md);
+}
+
+.time-slot {
+  height: 60px;
+  border-bottom: 1px solid var(--border-glass);
+  position: relative;
+}
+
+.time-label {
+  position: absolute;
+  left: -50px;
+  top: -10px;
+  width: 40px;
+  text-align: right;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.event-block {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border-left: 4px solid var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 10;
+}
+
+.event-block h4 {
+  font-size: 0.9rem;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.event-block p {
+  font-size: 0.75rem;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.current-time-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--danger);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.current-time-indicator::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--danger);
+}
+
+/* --- Vista: Configuración (Settings) --- */
+.view-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.settings-header {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.settings-item-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+}
+
+.settings-item-info p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.api-key-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+}
+
+.api-key-container .input-field {
+  padding-right: 48px;
+}
+
+.toggle-visibility-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 48px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.toggle-visibility-btn:hover {
+  color: var(--text-primary);
+}

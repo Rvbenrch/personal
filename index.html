@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#06060b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mi App Personal">
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/views.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <title>Mi App Personal</title>
+</head>
+<body class="app-background">
+
+    <!-- 1. Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-icon">🏋️</div>
+            <h1 class="splash-title">Mi App Personal</h1>
+            <div class="loading-dots" aria-label="Cargando">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Login Screen -->
+    <div id="login-screen" class="login-screen" style="display: none;">
+        <div class="login-card glass-card">
+            <div class="login-logo">🏋️</div>
+            <h2 class="login-heading">Bienvenido</h2>
+            <p class="login-subtitle">Tu app personal de salud y bienestar</p>
+            
+            <button id="btn-google-login" class="btn btn-google" aria-label="Iniciar sesión con Google">
+                <svg class="google-icon" viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continuar con Google
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. Onboarding Screen -->
+    <div id="onboarding-screen" class="onboarding-screen" style="display: none;">
+        <button id="btn-skip-onboarding" class="btn-skip" aria-label="Saltar tutorial">Saltar</button>
+        
+        <div class="onboarding-container">
+            <!-- Slide 1 -->
+            <div class="onboarding-slide active" data-slide="0">
+                <div class="slide-emoji">👋</div>
+                <h3 class="slide-title">¡Hola!</h3>
+                <p class="slide-desc">Bienvenido a tu nueva app personal para llevar el control total de tu salud y día a día.</p>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="onboarding-slide" data-slide="1" style="display: none;">
+                <div class="slide-emoji">📸</div>
+                <h3 class="slide-title">Registro Inteligente</h3>
+                <p class="slide-desc">Toma una foto de tu comida y la IA de Gemini analizará automáticamente los macros y calorías por ti.</p>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="onboarding-slide" data-slide="2" style="display: none;">
+                <div class="slide-emoji">📊</div>
+                <h3 class="slide-title">Control de Progreso</h3>
+                <p class="slide-desc">Sigue la evolución de tu peso, analiza tus entrenos y visualiza tus métricas clave con gráficas detalladas.</p>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="onboarding-slide" data-slide="3" style="display: none;">
+                <div class="slide-emoji">⚙️</div>
+                <h3 class="slide-title">Último paso</h3>
+                <p class="slide-desc">Configura tu clave de API para activar las funciones inteligentes y comienza a organizar tu vida.</p>
+                <button id="btn-start-app" class="btn btn-primary btn-large">Empezar ahora</button>
+            </div>
+        </div>
+        
+        <div class="onboarding-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- 4. Main App Container -->
+    <div id="app-main" class="app-main" style="display: none;">
+        
+        <!-- App Header -->
+        <header class="app-header glass-card">
+            <div class="header-profile">
+                <img id="user-avatar" class="user-avatar" src="" alt="Perfil de usuario">
+                <div class="header-text">
+                    <h2 id="user-greeting" class="user-greeting">Hola</h2>
+                    <p id="current-date" class="current-date">Cargando fecha...</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Views Container -->
+        <main id="views-container" class="views-container">
+            
+            <!-- View: Comidas -->
+            <section id="view-food" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>🍽️ Comidas</h2>
+                    <div class="date-selector">
+                        <button class="btn-icon" aria-label="Día anterior">◀</button>
+                        <span>Hoy</span>
+                        <button class="btn-icon" aria-label="Día siguiente">▶</button>
+                    </div>
+                </header>
+                
+                <div class="daily-summary-card glass-card">
+                    <div class="summary-visuals">
+                        <div id="macro-rings" class="macro-rings">
+                            <!-- SVG rings will be generated by JS -->
+                            <div class="calories-display">
+                                <span id="total-calories" class="calories-number">0</span>
+                                <span class="calories-label">kcal</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="macros-breakdown">
+                        <div class="macro-bar-container">
+                            <div class="macro-label-row">
+                                <span>Proteína</span>
+                                <span><span id="val-protein">0</span>g</span>
+                            </div>
+                            <div class="macro-bar"><div class="macro-fill protein-fill" style="width: 0%"></div></div>
+                        </div>
+                        <div class="macro-bar-container">
+                            <div class="macro-label-row">
+                                <span>Carbos</span>
+                                <span><span id="val-carbs">0</span>g</span>
+                            </div>
+                            <div class="macro-bar"><div class="macro-fill carbs-fill" style="width: 0%"></div></div>
+                        </div>
+                        <div class="macro-bar-container">
+                            <div class="macro-label-row">
+                                <span>Grasas</span>
+                                <span><span id="val-fat">0</span>g</span>
+                            </div>
+                            <div class="macro-bar"><div class="macro-fill fat-fill" style="width: 0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="meals-list" class="meals-list">
+                    <!-- Meal items will be injected here -->
+                    <div class="empty-state">No hay comidas registradas hoy</div>
+                </div>
+
+                <div class="fab-container">
+                    <button id="btn-food-mic" class="fab fab-secondary" aria-label="Grabar comida">🎤</button>
+                    <button id="btn-food-camera" class="fab fab-primary" aria-label="Foto de comida">📷</button>
+                    <input type="file" id="food-image-input" accept="image/*" capture="environment" style="display: none;">
+                </div>
+            </section>
+
+            <!-- View: Peso -->
+            <section id="view-weight" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>⚖️ Peso</h2>
+                </header>
+                
+                <div class="stats-row">
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">Actual</span>
+                        <span id="current-weight" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">Mínimo</span>
+                        <span id="min-weight" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">Máximo</span>
+                        <span id="max-weight" class="stat-value">--</span>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <span class="stat-label">Variación 7d</span>
+                        <span id="weekly-change" class="stat-value">--</span>
+                    </div>
+                </div>
+
+                <div class="weight-input-card glass-card">
+                    <h3>Registrar peso hoy</h3>
+                    <div class="weight-input-wrapper">
+                        <input type="number" id="weight-input" class="large-number-input" step="0.1" placeholder="78.5" aria-label="Peso en kilogramos">
+                        <span class="unit-label">kg</span>
+                    </div>
+                    <button id="btn-save-weight" class="btn btn-primary btn-full">Guardar</button>
+                </div>
+
+                <div class="chart-container glass-card">
+                    <canvas id="weight-chart" aria-label="Gráfica de peso histórico"></canvas>
+                </div>
+            </section>
+
+            <!-- View: Calendario -->
+            <section id="view-calendar" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>📅 Calendario</h2>
+                </header>
+                
+                <div class="calendar-nav glass-card">
+                    <button class="btn-icon" aria-label="Mes anterior">◀</button>
+                    <span id="calendar-month-label" class="month-label">Mes Año</span>
+                    <button class="btn-icon" aria-label="Mes siguiente">▶</button>
+                </div>
+
+                <div class="filter-toggles">
+                    <button id="btn-filter-workouts" class="filter-toggle active" aria-pressed="true">💪 Entrenos</button>
+                    <button id="btn-filter-meals" class="filter-toggle active" aria-pressed="true">🍽️ Comidas</button>
+                </div>
+
+                <div class="calendar-container glass-card">
+                    <div class="calendar-header-row">
+                        <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid">
+                        <!-- 42 cells will be generated by JS -->
+                    </div>
+                </div>
+
+                <!-- Day Detail Panel (Slide up) -->
+                <div id="day-detail-panel" class="slide-panel" style="display: none;">
+                    <div class="panel-header">
+                        <h3 id="panel-date-title">Fecha</h3>
+                        <button class="btn-close-panel" aria-label="Cerrar detalles">✕</button>
+                    </div>
+                    <div class="panel-content">
+                        <!-- Content populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- View: Entrenos -->
+            <section id="view-workouts" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>💪 Entrenos</h2>
+                </header>
+
+                <div class="import-card glass-card">
+                    <button id="btn-import-csv" class="btn btn-secondary btn-full">
+                        📁 Importar CSV de Hevy
+                    </button>
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                    <div id="import-progress" class="progress-bar-container" style="display: none;">
+                        <div class="progress-bar-fill" style="width: 0%"></div>
+                        <span class="progress-text">Importando...</span>
+                    </div>
+                </div>
+
+                <div class="search-container">
+                    <input type="search" id="workout-search" class="search-input glass-card" placeholder="Buscar ejercicio..." aria-label="Buscar ejercicio">
+                </div>
+
+                <div id="workouts-list" class="workouts-list">
+                    <!-- Workouts list populated by JS -->
+                    <div class="empty-state">No hay entrenos registrados</div>
+                </div>
+            </section>
+
+            <!-- View: Agenda -->
+            <section id="view-agenda" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>📒 Agenda</h2>
+                    <button id="btn-agenda-today" class="btn btn-small">Hoy</button>
+                </header>
+
+                <div class="agenda-nav glass-card">
+                    <button class="btn-icon" aria-label="Día anterior">◀</button>
+                    <span id="agenda-date-label" class="date-label">Fecha</span>
+                    <button class="btn-icon" aria-label="Día siguiente">▶</button>
+                    <button class="btn-icon mini-calendar-toggle" aria-label="Abrir mini calendario">📅</button>
+                </div>
+
+                <div class="agenda-timeline-container glass-card">
+                    <div id="agenda-timeline" class="agenda-timeline">
+                        <!-- Hour slots from 06:00 to 23:00 -->
+                        <div class="hour-slot" data-hour="6"><span class="hour-label">06:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="7"><span class="hour-label">07:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="8"><span class="hour-label">08:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="9"><span class="hour-label">09:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="10"><span class="hour-label">10:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="11"><span class="hour-label">11:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="12"><span class="hour-label">12:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="13"><span class="hour-label">13:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="14"><span class="hour-label">14:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="15"><span class="hour-label">15:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="16"><span class="hour-label">16:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="17"><span class="hour-label">17:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="18"><span class="hour-label">18:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="19"><span class="hour-label">19:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="20"><span class="hour-label">20:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="21"><span class="hour-label">21:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="22"><span class="hour-label">22:00</span><div class="hour-line"></div></div>
+                        <div class="hour-slot" data-hour="23"><span class="hour-label">23:00</span><div class="hour-line"></div></div>
+                        
+                        <div id="current-time-indicator" class="time-indicator" style="display: none;">
+                            <div class="time-dot"></div><div class="time-line"></div>
+                        </div>
+
+                        <!-- Events overlay container -->
+                        <div id="agenda-events" class="agenda-events"></div>
+                    </div>
+                </div>
+
+                <div class="fab-container">
+                    <button id="btn-add-event" class="fab fab-primary" aria-label="Añadir evento">➕</button>
+                </div>
+            </section>
+
+            <!-- View: Configuración -->
+            <section id="view-settings" class="view" style="display: none;">
+                <header class="view-header">
+                    <h2>⚙️ Configuración</h2>
+                </header>
+
+                <div class="settings-section">
+                    <div class="profile-card glass-card">
+                        <img id="settings-avatar" src="" alt="Avatar" class="settings-avatar">
+                        <div class="profile-info">
+                            <h3 id="settings-name">Nombre Apellido</h3>
+                            <p id="settings-email">correo@ejemplo.com</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>API Keys</h3>
+                    <div class="glass-card padding-card">
+                        <label for="gemini-key-input">Clave API de Gemini</label>
+                        <div class="input-with-button">
+                            <input type="password" id="gemini-key-input" class="text-input" placeholder="AIzaSy...">
+                            <button id="btn-test-gemini" class="btn btn-secondary">Probar</button>
+                        </div>
+                        <p class="help-text">Necesaria para el análisis de alimentos por IA.</p>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Preferencias</h3>
+                    <div class="glass-card padding-card settings-row">
+                        <span>Tema oscuro</span>
+                        <label class="switch">
+                            <input type="checkbox" id="theme-toggle" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Datos y Cuenta</h3>
+                    <div class="glass-card padding-card">
+                        <button id="btn-export-data" class="btn btn-secondary btn-full mb-3">Exportar todos mis datos</button>
+                        <button id="btn-logout" class="btn btn-danger btn-full">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation Bar -->
+        <nav id="bottom-nav" class="bottom-nav glass-card">
+            <ul class="nav-list">
+                <li class="nav-item active" data-view="food">
+                    <span class="nav-icon">🍽️</span>
+                    <span class="nav-label">Comidas</span>
+                </li>
+                <li class="nav-item" data-view="weight">
+                    <span class="nav-icon">⚖️</span>
+                    <span class="nav-label">Peso</span>
+                </li>
+                <li class="nav-item" data-view="calendar">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-label">Calendario</span>
+                </li>
+                <li class="nav-item" data-view="workouts">
+                    <span class="nav-icon">💪</span>
+                    <span class="nav-label">Entrenos</span>
+                </li>
+                <li class="nav-item" data-view="agenda">
+                    <span class="nav-icon">📒</span>
+                    <span class="nav-label">Agenda</span>
+                </li>
+                <li class="nav-item" data-view="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Config</span>
+                </li>
+            </ul>
+            <div class="nav-indicator"></div>
+        </nav>
+    </div>
+
+    <!-- 5. Modal Container -->
+    <div id="modal-container" class="modal-wrapper" style="display: none;">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-card">
+            <button class="btn-close-modal" aria-label="Cerrar">✕</button>
+            <div id="modal-body" class="modal-body">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Toast Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite">
+        <!-- Toasts injected by JS -->
+    </div>
+
+    <!-- 7. Food Analysis Modal -->
+    <div id="food-analysis-modal" class="modal-wrapper" style="display: none;">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-card analysis-modal">
+            <div class="analysis-image-container">
+                <img id="food-preview-img" src="" alt="Comida a analizar" class="food-preview">
+            </div>
+            
+            <div id="analysis-loading" class="analysis-loading">
+                <div class="loading-spinner"></div>
+                <p>Analizando plato con IA...</p>
+            </div>
+            
+            <div id="analysis-results" class="analysis-results" style="display: none;">
+                <h3 id="analysis-dish-title" class="dish-title">Nombre del plato</h3>
+                
+                <div class="form-group">
+                    <label for="meal-type-select">Tipo de comida</label>
+                    <select id="meal-type-select" class="select-input">
+                        <option value="desayuno">Desayuno</option>
+                        <option value="almuerzo">Almuerzo</option>
+                        <option value="cena">Cena</option>
+                        <option value="snack">Snack</option>
+                    </select>
+                </div>
+                
+                <div class="components-section">
+                    <h4>Componentes detectados</h4>
+                    <table id="analysis-components" class="components-table">
+                        <thead>
+                            <tr>
+                                <th>Ingrediente</th>
+                                <th>Cant.</th>
+                                <th>Kcal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Generated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="total-nutrition glass-card">
+                    <div class="nutri-item"><span>Cal</span><strong id="analysis-total-kcal">0</strong></div>
+                    <div class="nutri-item"><span>Pro</span><strong id="analysis-total-pro">0g</strong></div>
+                    <div class="nutri-item"><span>Car</span><strong id="analysis-total-car">0g</strong></div>
+                    <div class="nutri-item"><span>Gra</span><strong id="analysis-total-fat">0g</strong></div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button id="btn-cancel-meal" class="btn btn-secondary">Cancelar</button>
+                    <button class="btn btn-secondary">Editar</button>
+                    <button id="btn-save-meal" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. Event Modal -->
+    <div id="event-modal" class="modal-wrapper" style="display: none;">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content glass-card event-modal">
+            <h3 id="event-modal-title">Nuevo Evento</h3>
+            <div class="form-group">
+                <label for="event-title">Título</label>
+                <input type="text" id="event-title" class="text-input" placeholder="Ej. Reunión equipo">
+            </div>
+            
+            <div class="form-group-row">
+                <div class="form-group">
+                    <label for="event-date">Fecha</label>
+                    <input type="date" id="event-date" class="text-input">
+                </div>
+            </div>
+            
+            <div class="form-group-row">
+                <div class="form-group">
+                    <label for="event-start-time">Hora inicio</label>
+                    <input type="time" id="event-start-time" class="text-input">
+                </div>
+                <div class="form-group">
+                    <label for="event-end-time">Hora fin</label>
+                    <input type="time" id="event-end-time" class="text-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-type">Tipo</label>
+                <select id="event-type" class="select-input">
+                    <option value="event">Evento</option>
+                    <option value="reminder">Recordatorio</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Color</label>
+                <div class="color-picker">
+                    <label class="color-option"><input type="radio" name="event-color" value="#ff4b4b"><span class="color-circle" style="background: #ff4b4b;"></span></label>
+                    <label class="color-option"><input type="radio" name="event-color" value="#ff8f00"><span class="color-circle" style="background: #ff8f00;"></span></label>
+                    <label class="color-option"><input type="radio" name="event-color" value="#00e676" checked><span class="color-circle" style="background: #00e676;"></span></label>
+                    <label class="color-option"><input type="radio" name="event-color" value="#00b0ff"><span class="color-circle" style="background: #00b0ff;"></span></label>
+                    <label class="color-option"><input type="radio" name="event-color" value="#651fff"><span class="color-circle" style="background: #651fff;"></span></label>
+                    <label class="color-option"><input type="radio" name="event-color" value="#f50057"><span class="color-circle" style="background: #f50057;"></span></label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-recurring">Repetición</label>
+                <select id="event-recurring" class="select-input">
+                    <option value="none">No se repite</option>
+                    <option value="daily">Diariamente</option>
+                    <option value="weekly">Semanalmente</option>
+                    <option value="monthly">Mensualmente</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="event-description">Descripción</label>
+                <textarea id="event-description" class="text-area" rows="3" placeholder="Detalles del evento..."></textarea>
+            </div>
+            
+            <div class="modal-actions-row">
+                <button id="btn-delete-event" class="btn btn-danger" style="display: none;">Eliminar</button>
+                <div class="right-actions">
+                    <button class="btn btn-secondary btn-close-modal-action">Cancelar</button>
+                    <button id="btn-save-event" class="btn btn-primary">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
